@@ -1,0 +1,51 @@
+<script webc:type="js" webc:is="template" webc:root="override">
+  (() => {
+    function base64(text) {
+      return bytesToBase64(new TextEncoder().encode(text));
+    }
+
+    function base64(text) {
+      const bytes = new TextEncoder().encode(text);
+      const binString = Array.from(bytes, (byte) =>
+        String.fromCodePoint(byte)
+      ).join("");
+      return btoa(binString);
+    }
+
+    const encode = (text) =>
+      text.replace(/[\u0000-\u9999<>\&]/g, (i) => "&#" + i.charCodeAt(0) + ";");
+
+    const obfuscatedValue = base64(this.text);
+
+    return `<span data-obfuscated-text>${obfuscatedValue}</span>`;
+  })();
+</script>
+
+<script>
+  (() => {
+    const observerOptions = {
+      rootMargin: "0px",
+      threshold: 0.5,
+    };
+
+    function observerCallback(entries, observer) {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const element = entry.target;
+
+          element.textContent = atob(element.textContent);
+        }
+      });
+    }
+
+    const observer = new IntersectionObserver(
+      observerCallback,
+      observerOptions
+    );
+
+    document.querySelectorAll("[data-obfuscated-text]").forEach((element) => {
+      observer.observe(element);
+    });
+  })();
+</script>
+
